@@ -2,7 +2,7 @@
 $VmHostName = "192.168.3.224"
 $DatastoreName = "datastore1"
 $SnapshotName = "Base"
-$NetworkName = "480-Interenal"
+$NetworkName = "480-Internal"
 $BaseFolderName = "BASE VMs"
 $LinkedFolderName = "LINKED VMs"
 
@@ -39,7 +39,7 @@ elseif ($CloneType -eq "Linked") {
 # Create the linked clone
 $linkedvm = New-VM -LinkedClone -Name $CloneName -VM $vm -ReferenceSnapshot $snapshot -VMHost $vmhost -Datastore $ids
 # Set Network Adapter
-$linkedvm | Get-NetworkAdapter | Set-NetworkAdapter -Portgroup $NetworkName
+$linkedvm | Get-NetworkAdapter | Set-NetworkAdapter -NetworkName $NetworkName
 # Move into LINKED VMs Folder
 Move-VM -VM $linkedvm -InventoryLocation (Get-Folder -Name $LinkedFolderName)
 # Write that it was completed!
