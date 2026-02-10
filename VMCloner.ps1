@@ -23,29 +23,27 @@ $ids = Get-Datastore -Name $DatastoreName
 if ($CloneType -eq "Full") {
 # Create a temp Linked Clone
 $TempLinkedName = "{0}.linked" -f $vm.name
-$linkedvm = New-VM -LinkedClone -Name $TempLinkedClone -VM $vm -ReferenceSnapshot $snapshot -VMHost $vmhost -Datastore $ids
+$linkedvm = New-VM -LinkedClone -Name $TempLinkedName -VM $vm -ReferenceSnapshot $snapshot -VMHost $vmhost -Datastore $ids
 # Change to Full Base Clone
-$newvm = New-VM -Name "(give new name)" -VM $linkedvm -VMHost $vmhost -Datastore $ids
+$newvm = New-VM -Name $CloneName -VM $linkedvm -VMHost $vmhost -Datastore $ids
 # Snapshot the VM and remove linked clone
 $newvm | new-Snapshot -Name $SnapshotName
-$linkedvm | Remove-VM
+$linkedvm | Remove-VM -Confirm:$false
 # Move into BASE VMs folder
 Move-VM -VM $newvm -Destination (Get-Folder -Name $BaseFolderName)
 # Write that it was completed! 
 Write-Host "Full clone '$CloneName' created and placed in '$BaseFolderName'."
 }
 # Now if the user chooses Linked
-if ($CloneType -eq "Linked") {
+elseif ($CloneType -eq "Linked") {
 # Create the linked clone
 $linkedvm = New-VM -LinkedClone -Name $CloneName -VM $vm -ReferenceSnapshot $snapshot -VMHost $vmhost -Datastore $ids
 # Set Network Adapter
 $linkedvm | Get-NetworkAdapter | Set-NetworkAdapter -NetworkName $NetworkName
-# Add Snapshot
-$snapshot -VMHost $vmhost -Datastore $ids
 # Move into LINKED VMs Folder
 Move-VM -VM $linkedvm -Destination (Get-Folder -Name $LinkedFolderName)
 # Write that it was completed!
-Write-Host "Linked clone '$cloneName' created and placed in '$BaseFolderName'." 
+Write-Host "Linked clone '$cloneName' created and placed in '$LinkedFolderName'." 
 }
 else {
 Write-Host "'$CloneType' is not a clone type. Enter Full or Linked" 
