@@ -28,7 +28,7 @@ $linkedvm = New-VM -LinkedClone -Name $TempLinkedName -VM $vm -ReferenceSnapshot
 $newvm = New-VM -Name $CloneName -VM $linkedvm -VMHost $vmhost -Datastore $ids
 # Snapshot the VM and remove linked clone
 $newvm | new-Snapshot -Name $SnapshotName
-$linkedvm | Remove-VM -Confirm:$false
+$linkedvm | Remove-VM -DeletePermanently -Confirm:$false
 # Move into BASE VMs folder
 Move-VM -VM $newvm -Destination (Get-Folder -Name $BaseFolderName)
 # Write that it was completed! 
@@ -43,7 +43,7 @@ $linkedvm | Get-NetworkAdapter | Set-NetworkAdapter -NetworkName $NetworkName
 # Move into LINKED VMs Folder
 Move-VM -VM $linkedvm -Destination (Get-Folder -Name $LinkedFolderName)
 # Write that it was completed!
-Write-Host "Linked clone '$cloneName' created and placed in '$LinkedFolderName'." 
+Write-Host "Linked clone '$CloneName' created and placed in '$LinkedFolderName'." 
 }
 else {
 Write-Host "'$CloneType' is not a clone type. Enter Full or Linked" 
