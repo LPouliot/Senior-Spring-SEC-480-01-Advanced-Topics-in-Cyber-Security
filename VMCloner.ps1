@@ -28,7 +28,7 @@ $linkedvm = New-VM -LinkedClone -Name $TempLinkedName -VM $vm -ReferenceSnapshot
 $newvm = New-VM -Name $CloneName -VM $linkedvm -VMHost $vmhost -Datastore $ids
 # Snapshot the VM and remove linked clone
 $newvm | new-Snapshot -Name $SnapshotName
-$linkedvm | Remove-VM -DeletePermanently -Confirm:$false
+$linkedvm | Remove-VM -Confirm:$false
 # Move into BASE VMs folder
 Move-VM -VM $newvm -InventoryLocation (Get-Folder -Name $BaseFolderName)
 # Write that it was completed! 
