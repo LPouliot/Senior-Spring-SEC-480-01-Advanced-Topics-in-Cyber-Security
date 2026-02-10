@@ -2,7 +2,7 @@
 $VmHostName = "192.168.3.224"
 $DatastoreName = "datastore1"
 $SnapshotName = "Base"
-$NetworkName = "480-Internal"
+$NetworkName = "480-Interenal"
 $BaseFolderName = "BASE VMs"
 $LinkedFolderName = "LINKED VMs"
 
