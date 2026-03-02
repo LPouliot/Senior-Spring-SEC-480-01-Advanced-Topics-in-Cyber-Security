@@ -3,8 +3,8 @@ $VmHostName = "192.168.3.224"
 $DatastoreName = "datastore1"
 $SnapshotName = "Base"
 $NetworkName = "480-Internal"
-$BaseFolderName = "BASE VMs"
-$LinkedFolderName = "LINKED VMs"
+$BaseFolderName = "BASE-VMs"
+$LinkedFolderName = "LINKED-VMs"
 
 # Asking the User
 $VMName = Read-Host "Enter the name of the VM to be cloned"
