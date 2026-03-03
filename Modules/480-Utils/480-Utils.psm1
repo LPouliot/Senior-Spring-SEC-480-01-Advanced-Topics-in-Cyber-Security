@@ -56,11 +56,7 @@ function CreateClone([PSCustomObject]$conf)
     # Pick the source VM from the PROD folder 
 
     Write-Host "`nSelect the source VM to clone from:" -ForegroundColor Cyan
-    $folderName = if ($conf -and $conf.vm_folder) { 
-        $conf.vm_folder 
-    }else{ 
-        Read-Host "Enter the VM folder name" 
-    }
+    $folderName = if ($conf -and $conf.vm_folder) { $conf.vm_folder } else { Read-Host "Enter the VM folder name" }
     $vm = Select-VM -folder $folderName
 
     if (-not $vm) {
@@ -71,7 +67,6 @@ function CreateClone([PSCustomObject]$conf)
     # Ask the user what to name the new clone
 
     $CloneName = Read-Host "Enter the name for the new clone"
-Promoting to full clone '$CloneName'..." -ForegroundColor Cyan
 
     # Ask if Full or Linked? 
 
@@ -141,7 +136,13 @@ Promoting to full clone '$CloneName'..." -ForegroundColor Cyan
         $newvm | New-Snapshot -Name $SnapshotName
 
         # clean up and remove the temp linked clone
-        $linkedvm | Remove-VM -Confirm:$false
+        try{
+            $linkedvm | Remove-VM -Confirm:$false
+            Write-Host "Temporary Linked clone has been removed" -ForegroundColor Green
+        }catch{
+            Write-Host "Warning: Could not be done, delete manually" -ForegroundColor Yellow
+        }
+        
 
         # move into BASE-VMs folder
         Move-VM -VM $newvm -InventoryLocation (Get-Folder -Name $BaseFolderName)
