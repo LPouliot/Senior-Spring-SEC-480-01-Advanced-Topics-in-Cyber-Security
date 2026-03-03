@@ -71,12 +71,13 @@ function CreateClone([PSCustomObject]$conf)
     # Ask the user what to name the new clone
 
     $CloneName = Read-Host "Enter the name for the new clone"
+Promoting to full clone '$CloneName'..." -ForegroundColor Cyan
 
     # Ask if Full or Linked? 
 
-    $CloneType = Read-Host "Clone type — enter 'Full' or 'Linked'"
+    $CloneType = Read-Host "Clone type: enter 'Full' or 'Linked'"
 
-    # Resolve any config values. if missing any, revert to read-host
+    # Resolve any config values. if missing any, ask via read-host
     $SnapshotName = if ($conf -and $conf.SnapshotName) { 
         $conf.SnapshotName 
     }else{ 
@@ -128,7 +129,7 @@ function CreateClone([PSCustomObject]$conf)
                            -VMHost $vmhost `
                            -Datastore $datastore
 
-        Write-Host "Promoting to full clone '$CloneName'..." -ForegroundColor Cyan
+        Write-Host "Moving to full clone '$CloneName'..." -ForegroundColor Cyan
 
         # created a full clone from the temp linked clone
         $newvm = New-VM -Name $CloneName `
