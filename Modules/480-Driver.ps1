@@ -1,7 +1,15 @@
 Import-Module '480-Utils' -Force
-#Call the function
-480Connect
-$conf = Get-480Config -config_path "/home/admin/Senior-Spring-SEC-480-01-Advanced-Topics-in-Cyber-Security.480.json"
+# Call upon the function 
+
+# 480Connect (no longer needed)
+
+$conf = Get-480Config -config_path "./480.json"
+
 480Connect -server $conf.vcenter_server
+
 Write-Host "Selecting your VM..."
-Select-VM -folder "PROD"
+CreateClone -conf $conf 
+
+# Removed Select-VM -folder "PROD", 
+# since CreateClone function calls Select-VM, 
+# don't need it twice in here! 

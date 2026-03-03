@@ -10,22 +10,24 @@ function 480Connect([string]$server)
         # If this fails, Connect-VIServer will handle it.
     }
 }
+
 function Get-480Config([string] $config_path)
 {
     Write-Host "Reading " $config_path
-    $conf=$null
+    $conf = $null
     if(Test-Path $config_path){
         $conf = (Get-Content -Raw -Path $config_path | ConvertFrom-Json)
-        $msg - "Using Configutation at {0}" -f $config_path
+        $msg = "Using Configuration at {0}" -f $config_path 
+        Write-Host -ForegroundColor Green $msg
     }else{
-        Write-Host -ForegroundColor "Yellow" "No Configuration"
+        Write-Host -ForegroundColor Yellow "No Configuration found at $config_path"
     }
     return $conf
 }
 
 function Select-VM([string] $folder)
 {
-    $selected_vm=$null
+    $selected_vm = $null
     try 
     {
         $vms = Get-VM -Location $folder
@@ -33,64 +35,138 @@ function Select-VM([string] $folder)
         foreach($vm in $vms)
         {
             Write-Host [$index] $vm.Name
-            $index+=1
+            $index += 1
         }
         $pick_index = Read-Host "Which index number [x] do you wish to pick?"
         if($pick_index -ge 1 -and $pick_index -le $vms.Count){
-            $selected_vm = $vms[$pick_index -1]
-            Write-Host "You picked " $selected_vm.name
-            # Note this is a full on vm object that is interactable
+            $selected_vm = $vms[$pick_index - 1]
+            Write-Host "You picked " $selected_vm.Name
             return $selected_vm
         }else{
-            Write-Host "Invalid input. Try a number through 1 to 4." -ForegroundColor "Yellow:"
+            Write-Host "Invalid input. Try a number from 1 to $($vms.Count)." -ForegroundColor Yellow
         }
     }
     catch {
-        Write-Host "Invalid Folder: $folder" -ForegroundColor "Red"
+        Write-Host "Invalid Folder: $folder" -ForegroundColor Red
     }
 }
 
-# Milestone 5 Function below 
-function CreateClone()
+function CreateClone([PSCustomObject]$conf)
 {
-    $VMName = Read-Host "Enter the name of the VM to be cloned"
-    $CloneName = Read-Host "Enter the name of the new Clone"
-    $CloneType = Read-Host "Would you like a Full or Linked type" 
-    
-    $vm = Get-VM -Name $VMName
+    # Pick the source VM from the PROD folder 
+
+    Write-Host "`nSelect the source VM to clone from:" -ForegroundColor Cyan
+    $folderName = if ($conf -and $conf.vm_folder) { 
+        $conf.vm_folder 
+    }else{ 
+        Read-Host "Enter the VM folder name" 
+    }
+    $vm = Select-VM -folder $folderName
+
+    if (-not $vm) {
+        Write-Host "No VM selected. Aborting." -ForegroundColor Red
+        return
+    }
+
+    # Ask the user what to name the new clone
+
+    $CloneName = Read-Host "Enter the name for the new clone"
+
+    # Ask if Full or Linked? 
+
+    $CloneType = Read-Host "Clone type — enter 'Full' or 'Linked'"
+
+    # Resolve any config values. if missing any, revert to read-host
+    $SnapshotName = if ($conf -and $conf.SnapshotName) { 
+        $conf.SnapshotName 
+    }else{ 
+        Read-Host "Enter the snapshot name to clone from" 
+    }
+    $VmHostName   = if ($conf -and $conf.VmHostName) { 
+        $conf.VmHostName 
+    }else{ 
+        Read-Host "Enter the ESXi host (IP or hostname)" 
+    }
+    $DatastoreName= if ($conf -and $conf.DatastoreName) { 
+        $conf.DatastoreName 
+    }else{ 
+        Read-Host "Enter the datastore name" 
+    }
+    $NetworkName  = if ($conf -and $conf.NetworkName) { 
+        $conf.NetworkName 
+    }else{
+        Read-Host "Enter the network/portgroup name" 
+    }
+    $BaseFolderName   = if ($conf -and $conf.BaseFolderName) { 
+        $conf.BaseFolderName 
+    }else{ 
+        Read-Host "Enter the BASE-VMs folder name" 
+    }
+    $LinkedFolderName = if ($conf -and $conf.LinkedFolderName) { 
+        $conf.LinkedFolderName 
+    }else{ 
+        Read-Host "Enter the LINKED-VMs folder name" 
+    }
+
+    # Gather vCenter objects 
+
     $snapshot = Get-Snapshot -VM $vm -Name $SnapshotName
-    $vmhost = Get-VMHost -Name $VmHostName
-    $ids = Get-Datastore -Name $DatastoreName
+    $vmhost   = Get-VMHost   -Name $VmHostName
+    $datastore= Get-Datastore -Name $DatastoreName
 
-    # Else if statement
+    # The clone action, similar to the last milestone
 
-    # If the user chooses Full
     if ($CloneType -eq "Full") {
-        # Create a temp Linked Clone
-        $TempLinkedName = "{0}.linked" -f $vm.name
-        $linkedvm = New-VM -LinkedClone -Name $TempLinkedName -VM $vm -ReferenceSnapshot $snapshot -VMHost $vmhost -Datastore $ids
-        # Change to Full Base Clone
-        $newvm = New-VM -Name $CloneName -VM $linkedvm -VMHost $vmhost -Datastore $ids
-        # Snapshot the VM and remove linked clone
-        $newvm | new-Snapshot -Name $SnapshotName
+        Write-Host "`nCreating temporary linked clone..." -ForegroundColor Cyan
+
+        # create a tempory linked clone from the Base snapshot
+        $TempLinkedName = "{0}.linked.tmp" -f $vm.Name
+        $linkedvm = New-VM -LinkedClone `
+                           -Name $TempLinkedName `
+                           -VM $vm `
+                           -ReferenceSnapshot $snapshot `
+                           -VMHost $vmhost `
+                           -Datastore $datastore
+
+        Write-Host "Promoting to full clone '$CloneName'..." -ForegroundColor Cyan
+
+        # created a full clone from the temp linked clone
+        $newvm = New-VM -Name $CloneName `
+                        -VM $linkedvm `
+                        -VMHost $vmhost `
+                        -Datastore $datastore
+
+        # Snapshot the new full clone so it replicates the base
+        $newvm | New-Snapshot -Name $SnapshotName
+
+        # clean up and remove the temp linked clone
         $linkedvm | Remove-VM -Confirm:$false
-        # Move into BASE VMs folder
+
+        # move into BASE-VMs folder
         Move-VM -VM $newvm -InventoryLocation (Get-Folder -Name $BaseFolderName)
-        # Write that it was completed! 
-        Write-Host "Full clone '$CloneName' created and placed in '$BaseFolderName'."
-    }
-    # Now if the user chooses Linked
-    elseif ($CloneType -eq "Linked") {
-        # Create the linked clone
-        $linkedvm = New-VM -LinkedClone -Name $CloneName -VM $vm -ReferenceSnapshot $snapshot -VMHost $vmhost -Datastore $ids
-        # Set Network Adapter
-        $linkedvm | Get-NetworkAdapter | Set-NetworkAdapter -NetworkName $NetworkName
-        # Move into LINKED VMs Folder
+
+        Write-Host "Full clone '$CloneName' created and placed in '$BaseFolderName'." -ForegroundColor Green
+
+    }elseif ($CloneType -eq "Linked") {
+        Write-Host "`nCreating linked clone '$CloneName'..." -ForegroundColor Cyan
+
+        # create linked clone from the Base snapshot
+        $linkedvm = New-VM -LinkedClone `
+                           -Name $CloneName `
+                           -VM $vm `
+                           -ReferenceSnapshot $snapshot `
+                           -VMHost $vmhost `
+                           -Datastore $datastore
+
+        # attach to the correct network
+        $linkedvm | Get-NetworkAdapter | Set-NetworkAdapter -NetworkName $NetworkName -Confirm:$false
+
+        # move into LINKED-VMs folder
         Move-VM -VM $linkedvm -InventoryLocation (Get-Folder -Name $LinkedFolderName)
-        # Write that it was completed!
-        Write-Host "Linked clone '$CloneName' created and placed in '$LinkedFolderName'." 
-    }
-    else {
-        Write-Host "'$CloneType' is not a clone type. Enter Full or Linked" 
+
+        Write-Host "Linked clone '$CloneName' created and placed in '$LinkedFolderName'." -ForegroundColor Green
+
+    }else{
+        Write-Host "'$CloneType' is not a valid clone type. Please enter 'Full' or 'Linked'." -ForegroundColor Red
     }
 }
