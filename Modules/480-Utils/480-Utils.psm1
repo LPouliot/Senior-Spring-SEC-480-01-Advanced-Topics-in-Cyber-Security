@@ -178,8 +178,9 @@ function CreateClone([PSCustomObject]$conf)
 
 # Function that creates a new Virtual Switch and Portgroup
 
-function NewNetwork([PSCustomObject]$conf) #Is PsCustomObject needed? 
+function NewNetwork([string]$conf) 
 {
+    $conf = Get-480Config -config_path $conf
     $SwitchName = Read-Host "Enter the name of the new Virtual Switch/Network"
     New-VirtualSwitch -VMHost $vmhost.vm_host -Name $SwitchName
     $PortName = Read-Host "Enter the name of the new Virtual Port"
