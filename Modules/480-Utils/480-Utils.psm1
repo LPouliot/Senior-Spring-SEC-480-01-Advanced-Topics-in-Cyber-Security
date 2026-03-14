@@ -181,9 +181,9 @@ function CreateClone([PSCustomObject]$conf)
 
 function NewNetwork([PSCustomObject]$conf) 
 {
-    $conf = Get-480Config -config_path $conf
+    $VmHost = Get-VMHost -Name $conf.VmHostName # Resolves the Host IP into an object for New-VirtualSwitch to use
     $SwitchName = Read-Host "Enter the name of the new Virtual Switch/Network"
-    New-VirtualSwitch -VMHost $conf.VmHostName -Name $SwitchName
+    New-VirtualSwitch -VMHost $VmHost -Name $SwitchName
     $PortName = Read-Host "Enter the name of the new Virtual Port"
     New-VirtualPortGroup -VirtualSwitch $SwitchName -Name $PortName
 }
