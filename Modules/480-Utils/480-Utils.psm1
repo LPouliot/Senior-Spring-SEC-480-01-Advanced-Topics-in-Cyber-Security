@@ -174,18 +174,18 @@ function CreateClone([PSCustomObject]$conf)
     }
 }
 
-## Milestone 6 ## 
+## Milestone 6 #### 
 
 # Function that creates a new Virtual Switch and Portgroup
-function NetNetwork()
+function NewNetwork()
 {
-
+    $VMName = Read-Host "Enter the name of the new Virtual Switch"
 }
 
 # Function that gets the IP and MAC address of the *first* interface
 # of a named (specific) VM 
 function GetIP()
 {
-
+    
 }
 
