@@ -183,7 +183,7 @@ function NewNetwork([PSCustomObject]$conf)
 {
     $conf = Get-480Config -config_path $conf
     $SwitchName = Read-Host "Enter the name of the new Virtual Switch/Network"
-    New-VirtualSwitch -VMHost $vmhost.VmHostName -Name $SwitchName
+    New-VirtualSwitch -VMHost $conf.VmHostName -Name $SwitchName
     $PortName = Read-Host "Enter the name of the new Virtual Port"
     New-VirtualPortGroup -VirtualSwitch $SwitchName -Name $PortName
 }
@@ -191,14 +191,14 @@ function NewNetwork([PSCustomObject]$conf)
 # Function that gets the Network, IP and MAC address of the *first* interface
 # of a named (specific) VM 
 
-function GetIP(){
-    $chosen_vm = Select-VM # Want to call the function to select a VM
+function GetIP([PSCustomObject]$conf){
+    $chosen_vm = Select-VM -folder $conf.vm_folder # Runs Select-VM function and Selects a folder to search through 
     $details = Get-NetworkAdapter -VM $chosen_vm
     Write-Host `n"Network | " -ForegroundColor DarkCyan -NoNewline 
     Write-Host $details.NetworkName
     Write-Host "MAC Address | " -ForegroundColor DarkCyan -NoNewline 
     Write-Host $details.MacAddress
-    Write-Error "IP Address | " -ForegroundColor DarkCyan -NoNewline 
+    Write-Host "IP Address | " -ForegroundColor DarkCyan -NoNewline 
     Write-Host $chosen_vm.guest.ipaddress[0]
 }
 

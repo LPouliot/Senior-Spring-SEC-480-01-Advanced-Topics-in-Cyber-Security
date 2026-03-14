@@ -18,6 +18,12 @@ CreateClone -conf $conf
 
 ## Milestone 6 ##
 
+# Calling New Network Function
+NewNetwork -conf $conf 
+
+# Calling GetIP function 
+GetIP -conf $conf
+
 # Utility function to start a VM or VMs by name 
 # Call the function something different than the PowerCli command 
 
