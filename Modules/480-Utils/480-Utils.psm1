@@ -178,11 +178,12 @@ function CreateClone([PSCustomObject]$conf)
 
 # Function that creates a new Virtual Switch and Portgroup
 
-function NewNetwork([string]$conf)
+function NewNetwork([PSCustomObject]$conf) #Is PsCustomObject needed? 
 {
     $SwitchName = Read-Host "Enter the name of the new Virtual Switch/Network"
-    New-VirtualSwitch -VMHost $vmhost -Name $SwitchName
-    New-VirtualPortGroup -VirtualSwitch $SwitchName -Name $SwitchName
+    New-VirtualSwitch -VMHost $vmhost.vm_host -Name $SwitchName
+    $PortName = Read-Host "Enter the name of the new Virtual Port"
+    New-VirtualPortGroup -VirtualSwitch $SwitchName -Name $PortName
 }
 
 # Function that gets the Network, IP and MAC address of the *first* interface
@@ -191,8 +192,11 @@ function NewNetwork([string]$conf)
 function GetIP(){
     $chosen_vm = CreateClone
     $details = Get-NetworkAdapter -VM $chosen_vm
-    Write-Host `n"Network" -ForegroundColor DarkCyan -Separator -NoNewline Write-Host $details.NetworkName
-    Write-Host "MAC Address" -ForegroundColor DarkCyan -Separator -NoNewline Write-Host $details.MacAddress
-    Write-Error "IP Address" -ForegroundColor DarkCyan -Separator -NoNewline Write-Host $chosen_vm.guest.ipaddress[0]
+    Write-Host `n"Network | " -ForegroundColor DarkCyan -NoNewline 
+    Write-Host $details.NetworkName
+    Write-Host "MAC Address | " -ForegroundColor DarkCyan -NoNewline 
+    Write-Host $details.MacAddress
+    Write-Error "IP Address | " -ForegroundColor DarkCyan -NoNewline 
+    Write-Host $chosen_vm.guest.ipaddress[0]
 }
 

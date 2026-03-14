@@ -25,5 +25,3 @@ CreateClone -conf $conf
 # Utility function that sets a VM network adapter
 # To the network of choice
 
-### 
-
