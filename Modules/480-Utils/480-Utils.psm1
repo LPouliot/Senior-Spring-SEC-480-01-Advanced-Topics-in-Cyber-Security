@@ -239,7 +239,7 @@ function StopVM([PSCustomObject]$conf){
 # Function that sets a VM network adapter on different interfaces
 # To the network of choice
 function SetNetwork([PSCustomObject]$conf){
-    Write-Host "Setting a Network and Choosing and Adapter" -ForegroundColor Cyan
+    Write-Host "Choosing a Network and Adapter" -ForegroundColor Cyan
     # Shows and lets the user choose a network
     $chosenVM = Select-VM -folder $conf.vm_folder
     # Checker to see if a VM has been selected, returns if none is found

@@ -27,10 +27,10 @@ $conf = Get-480Config -config_path "./480.json"
 #GetIP -conf $conf
 
 # Start VM function
-StartVM -conf $conf 
+#StartVM -conf $conf 
 
 # Stop VM function
-StopVM -conf $conf
+#StopVM -conf $conf
 
 # Calling SetNetwork Function
 SetNetwork -conf $conf 
