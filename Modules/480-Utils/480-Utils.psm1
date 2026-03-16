@@ -241,11 +241,7 @@ function StopVM([PSCustomObject]$conf){
 function SetNetwork([PSCustomObject]$conf){
     # Shows and lets the user choose a network
     $chosenVM = Select-VM -folder $conf.vm_folder
-    if (-not $chosenVM){ # Writing a catch here for picking VMs  
-        Write-Host "No VM Here" -ForegroundColor Red
-        return 
-    }
-    do{
+
         Write-Host "Available Networks:" -ForegroundColor DarkCyan
         try {
             $networks = Get-VirtualNetwork
@@ -273,8 +269,8 @@ function SetNetwork([PSCustomObject]$conf){
     Write-Host "Available Adapters" -ForegroundColor DarkCyan
     $adapters = Get-NetworkAdapter -VM $chosenVM
     $adapterIndex = 1
-    foreach ($adapter in $adatapers){
-        Write-Host [$adapterIndex] "$adapter | Currently: $adapter.NetworkName"
+    foreach ($adapter in $adapters){
+        Write-Host [$adapterIndex] "$(adapter.Name) | Currently: $(adapter.NetworkName)"
         $adapterIndex++
     }
     $adapterPick = Read-Host "Which adapter index [x] would you like to assign $ChosenNetwork to?"
@@ -288,8 +284,8 @@ function SetNetwork([PSCustomObject]$conf){
         Write-Host "The Network $ChosenNetwork has been placed into $SelectedAdapter" -ForegroundColor Green
     }else{
         Write-Host "Invalid adapter" -ForegroundColor Yellow
-    }
 }
+
 
 
 
