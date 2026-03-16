@@ -3,7 +3,7 @@ interfaces {
         address {{ wan_ip }}/24
     }
     ethernet eth1 {
-    address {{ lan_ip }}/24
+        address {{ lan_ip }}/24
     }
     loopback lo {
     }
@@ -48,7 +48,7 @@ system {
         commit-revisions 100
     }
     console {
-        device ttyS0{
+        device ttyS0 {
             speed 115200
         }
     }
