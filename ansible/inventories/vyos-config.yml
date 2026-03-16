@@ -13,7 +13,7 @@
   prompt: enter your new Vyos password
   private: true
 
-# Tasks - modules with agruments
+# Tasks - modules with agruments 
   tasks: 
    - name: set the password hash fact
      set_fact:

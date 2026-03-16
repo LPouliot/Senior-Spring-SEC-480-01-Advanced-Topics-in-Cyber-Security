@@ -2,11 +2,11 @@ interfaces {
     ethernet eth0 {
         address {{ wan_ip }}/24
     }
-}
-ethernet eth1 {
+    ethernet eth1 {
     address {{ lan_ip }}/24
-}
-loopback lo {
+    }
+    loopback lo {
+    }
 }
 nat {
     source {
@@ -43,6 +43,7 @@ service {
     }
 }
 system {
+    host-name {{ hostname }}
     config-management {
         commit-revisions 100
     }
@@ -50,32 +51,31 @@ system {
         device ttyS0{
             speed 115200
         }
-        host-name {{ hostname }}
-        login {
-            user vyos {
-                authentication {
-                    encrypted-password {{ password_hash }}
-                    plaintext-password ""
-                }
+    }
+    login {
+        user vyos {
+            authentication {
+                encrypted-password {{ password_hash }}
+                plaintext-password ""
             }
         }
-        name-server {{ name_server }}
-        ntp {
-            server 0.pool.ntp.org {
-            }
-            server 1.pool.ntp.org {
-            }
-            server 2.pool.ntp.org {
-            }
+    }
+    name-server {{ nameserver }}
+    ntp {
+        server 0.pool.ntp.org {
         }
-        syslog {
-            global {
-                facility all {
-                    level info
-                }
-                facility protocols {
-                    level debug
-                }
+        server 1.pool.ntp.org {
+        }
+        server 2.pool.ntp.org {
+        }
+    }
+    syslog {
+        global {
+            facility all {
+                level info
+            }
+            facility protocols {
+                level debug
             }
         }
     }
