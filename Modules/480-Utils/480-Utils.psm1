@@ -194,11 +194,87 @@ function NewNetwork([PSCustomObject]$conf)
 function GetIP([PSCustomObject]$conf){
     $chosen_vm = Select-VM -folder $conf.vm_folder # Runs Select-VM function and Selects a folder to search through 
     $details = Get-NetworkAdapter -VM $chosen_vm
-    Write-Host `n"Network | " -ForegroundColor DarkCyan -NoNewline 
+    Write-Host `n"Network   | " -ForegroundColor DarkCyan -NoNewline 
     Write-Host $details.NetworkName
     Write-Host "MAC Address | " -ForegroundColor DarkCyan -NoNewline 
     Write-Host $details.MacAddress
-    Write-Host "IP Address | " -ForegroundColor DarkCyan -NoNewline 
+    Write-Host "IP Address  | " -ForegroundColor DarkCyan -NoNewline 
     Write-Host $chosen_vm.guest.ipaddress[0]
 }
+
+# Function that will start a VM or VMs by name
+# Finally figured out a working loop! Using do and while! 
+
+function StartVM([PSCustomObject]$conf){
+    do{
+        $Answer = Read-Host "Do you want to start a VM? [Y] [N]"
+        if($Answer -eq 'Y'){
+            $pickedVM = Select-VM -folder $conf.vm_folder
+            Start-VM -VM $pickedVM
+            Write-Host "VM has been Started" -ForegroundColor Green
+        }elseif($Answer -eq 'N'){
+            Write-Host "Ending Function" -ForegroundColor Yellow
+        }else{
+            Write-Host "Imput did not match Y or N" -ForegroundColor Red
+        }
+    } while ($Answer -ne 'N')
+}
+
+# Function that will stop a VM or VMs by name
+function StopVM([PSCustomObject]$conf){
+    do{
+        $Answer = Read-Host "Do you want to stop a VM? [Y] [N]"
+        if($Answer -eq 'Y'){
+            $pickedVM = Select-VM -folder $conf.vm_folder
+            Stop-VM -VM $pickedVM
+            Write-Host "VM has been Stopped" -ForegroundColor Green
+        }elseif($Answer -eq 'N'){
+            Write-Host "Ending Function" -ForegroundColor Yellow
+        }else{
+            Write-Host "Imput did not match Y or N" -ForegroundColor Red
+        }
+    } while ($Answer -ne 'N')
+}
+
+# Function that sets a VM network adapter on different interfaces
+# To the network of choice
+function Set-Network([PSCustomObject]$conf){
+    $chosenVM = Select-VM -folder $conf.vm_folder
+    $adapters = Get-NetworkAdapter -VM $chosenVM
+    Write-Host "Next: Networks" -ForegroundColor DarkCyan
+    try{
+        $networks = Get-VirtualNetwork
+        $index = 1
+        foreach($network in $networks)
+        {
+            Write-Host [$index] $network
+            $index += 1
+        }
+        $pick_index = Read-Host "Which index number [x] do you wish to pick?"
+        if($pick_index -ge 1 -and $pick_index -le $networks.Count){
+            $selected_network = $networks[$pick_index - 1]
+            Write-Host "You picked " $selected_network.Name
+            return $selected_network
+        }else{
+            Write-Host "Invalid input. Try a number from 1 to $($networks.Count)." -ForegroundColor Yellow
+        }
+    }
+    catch{
+        Write-Host "Invalid type, try again." -ForegroundColor Red
+    }
+    Write-Host "Next: Adapters" -ForegroundColor DarkCyan
+   
+     foreach ($adapter in $adapters){
+        $indexNew = $null 
+        try{
+            Write-Host ""
+        }
+     }
+        
+
+
+    } 
+}
+
+
 

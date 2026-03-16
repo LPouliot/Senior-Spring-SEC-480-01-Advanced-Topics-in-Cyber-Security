@@ -1,16 +1,18 @@
 ## Milestone 5 ##
 
-Import-Module '480-Utils' -Force
 # Call upon the function 
+Import-Module '480-Utils' -Force
 
-# 480Connect (no longer needed)
-
+# Grabbing the path that holds the .json file
 $conf = Get-480Config -config_path "./480.json"
 
+# Calling 480Connect Function
 480Connect -server $conf.vcenter_server
 
-Write-Host "Selecting your VM..."
-CreateClone -conf $conf 
+# Write-Host "Selecting your VM..."
+
+# Calling Createclone Function
+#CreateClone -conf $conf 
 
 # Removed Select-VM -folder "PROD", 
 # since CreateClone function calls Select-VM, 
@@ -19,15 +21,15 @@ CreateClone -conf $conf
 ## Milestone 6 ##
 
 # Calling New Network Function
-NewNetwork -conf $conf 
+#NewNetwork -conf $conf 
 
 # Calling GetIP function 
-GetIP -conf $conf
+#GetIP -conf $conf
 
-# Utility function to start a VM or VMs by name 
-# Call the function something different than the PowerCli command 
+# Start VM
+#StartVM -conf $conf 
 
+# Stop VM
+#StopVM -conf $conf
 
-# Utility function that sets a VM network adapter
-# To the network of choice
 
