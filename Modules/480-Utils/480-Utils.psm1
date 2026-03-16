@@ -238,42 +238,57 @@ function StopVM([PSCustomObject]$conf){
 
 # Function that sets a VM network adapter on different interfaces
 # To the network of choice
-function Set-Network([PSCustomObject]$conf){
+function SetNetwork([PSCustomObject]$conf){
+    # Shows and lets the user choose a network
     $chosenVM = Select-VM -folder $conf.vm_folder
+    if (-not $chosenVM){ # Writing a catch here for picking VMs  
+        Write-Host "No VM Here" -ForegroundColor Red
+        return 
+    }
+    do{
+        Write-Host "Available Networks:" -ForegroundColor DarkCyan
+        try {
+            $networks = Get-VirtualNetwork
+            $index = 1
+            foreach ($network in $networks){ #creating a loop to show all networks options
+                Write-Host [$index] $network.Name
+                $index++
+            }
+            $NetPick = Read-Host "Which network index [x] would you like?"
+            # Ensures the user entered a valid number within the list range 
+            if ($NetPick -ge 1 -and $NetPick -le $networks.Count){
+            # Grabs the actual network from the array, first position is at 0 not 1
+                $ChosenNetwork = $networks[$NetPick - 1] 
+                Write-Host "Selected: $ChosenNetwork" -ForegroundColor DarkCyan
+            }else{
+                Write-Host "Invalid, try again" -ForegroundColor Yellow
+                continue # to re-loop! 
+            }
+        }catch{
+            Write-Host "Could not grab the networks" -ForegroundColor Red
+        }
+    }
+
+    # Shows the adapters on the VM and lets the user pick one 
+    Write-Host "Available Adapters" -ForegroundColor DarkCyan
     $adapters = Get-NetworkAdapter -VM $chosenVM
-    Write-Host "Next: Networks" -ForegroundColor DarkCyan
-    try{
-        $networks = Get-VirtualNetwork
-        $index = 1
-        foreach($network in $networks)
-        {
-            Write-Host [$index] $network
-            $index += 1
-        }
-        $pick_index = Read-Host "Which index number [x] do you wish to pick?"
-        if($pick_index -ge 1 -and $pick_index -le $networks.Count){
-            $selected_network = $networks[$pick_index - 1]
-            Write-Host "You picked " $selected_network.Name
-            return $selected_network
-        }else{
-            Write-Host "Invalid input. Try a number from 1 to $($networks.Count)." -ForegroundColor Yellow
-        }
+    $adapterIndex = 1
+    foreach ($adapter in $adatapers){
+        Write-Host [$adapterIndex] "$adapter | Currently: $adapter.NetworkName"
+        $adapterIndex++
     }
-    catch{
-        Write-Host "Invalid type, try again." -ForegroundColor Red
+    $adapterPick = Read-Host "Which adapter index [x] would you like to assign $ChosenNetwork to?"
+    if ($adapterPick -ge 1 -and $adapterPick -le $adapters.Count){
+        $SelectedAdapter = $adapters[$adapterPick - 1]
+
+        # Applying the network to the adapter 
+        Set-NetworkAdapter -NetworkAdapter $SelectedAdapter `
+                            -NetworkName $ChosenNetwork.Name `
+                            -Confirm:$false
+        Write-Host "The Network $ChosenNetwork has been placed into $SelectedAdapter" -ForegroundColor Green
+    }else{
+        Write-Host "Invalid adapter" -ForegroundColor Yellow
     }
-    Write-Host "Next: Adapters" -ForegroundColor DarkCyan
-   
-     foreach ($adapter in $adapters){
-        $indexNew = $null 
-        try{
-            Write-Host ""
-        }
-     }
-        
-
-
-    } 
 }
 
 
