@@ -24,7 +24,7 @@ $conf = Get-480Config -config_path "./480.json"
 #NewNetwork -conf $conf 
 
 # Calling GetIP function 
-#GetIP -conf $conf
+GetIP -conf $conf
 
 # Start VM function
 #StartVM -conf $conf 
@@ -33,6 +33,6 @@ $conf = Get-480Config -config_path "./480.json"
 #StopVM -conf $conf
 
 # Calling SetNetwork Function
-SetNetwork -conf $conf 
+#SetNetwork -conf $conf 
 
 
