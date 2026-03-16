@@ -1,1 +1,33 @@
-test
+# Playbook - define howm, in which order, on which mahines,
+# and what modules should be executed. 
+
+# This Playbook:
+# Preforms the inital configuration for bluex-fw
+
+# Plays - series of tasks with a designated host and user
+- name: vyos network configuration
+  hosts: vyos
+  vars_prompt:
+
+- name: password
+  prompt: enter your new Vyos password
+  private: true
+
+# Tasks - modules with agruments
+  tasks: 
+   - name: set the password hash fact
+     set_fact:
+     password_hash: "{{ password | password_hash('sha512')}}"
+   - name: load vyos config from template 
+     become: yes
+     template:
+        src: files/vyos/config.boot.j2
+        dest: /config/config.boot
+        mode: "0775"
+        owner: root
+        group: vyattacfg
+   - name: bounce and end
+     become: yes
+     shell: nohup bash -c "/usr/bin/sleep 5 && /usr/sbin/shutdown -r now" &
+
+
