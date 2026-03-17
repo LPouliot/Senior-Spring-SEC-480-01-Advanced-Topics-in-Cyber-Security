@@ -28,6 +28,7 @@ function Get-480Config([string] $config_path)
 
 function Select-VM([string] $folder)
 {
+    Write-Host "Selecting a VM:" -ForegroundColor DarkCyan
     $selected_vm = $null
     try 
     {
@@ -191,7 +192,8 @@ function NewNetwork([PSCustomObject]$conf)
 # Function that gets the Network, IP and MAC address of the *first* interface
 # of a named (specific) VM 
 
-function GetIP([PSCustomObject]$conf){
+function GetIP([PSCustomObject]$conf)
+{
     $chosen_vm = Select-VM -folder $conf.vm_folder # Runs Select-VM function and Selects a folder to search through 
     $details = Get-NetworkAdapter -VM $chosen_vm
     Write-Host `n"Network   | " -ForegroundColor DarkCyan -NoNewline 
@@ -205,7 +207,8 @@ function GetIP([PSCustomObject]$conf){
 # Function that will start a VM or VMs by name
 # Finally figured out a working loop! Using do and while! 
 
-function StartVM([PSCustomObject]$conf){
+function StartVM([PSCustomObject]$conf)
+{
     do{
         $Answer = Read-Host "Do you want to start a VM? [Y] [N]"
         if($Answer -eq 'Y'){
@@ -221,7 +224,8 @@ function StartVM([PSCustomObject]$conf){
 }
 
 # Function that will stop a VM or VMs by name
-function StopVM([PSCustomObject]$conf){
+function StopVM([PSCustomObject]$conf)
+{
     do{
         $Answer = Read-Host "Do you want to stop a VM? [Y] [N]"
         if($Answer -eq 'Y'){
@@ -238,7 +242,8 @@ function StopVM([PSCustomObject]$conf){
 
 # Function that sets a VM network adapter on different interfaces
 # To the network of choice
-function SetNetwork([PSCustomObject]$conf){
+function SetNetwork([PSCustomObject]$conf)
+{
     Write-Host "Choosing a Network and Adapter" -ForegroundColor Cyan
     # Shows and lets the user choose a network
     $chosenVM = Select-VM -folder $conf.vm_folder

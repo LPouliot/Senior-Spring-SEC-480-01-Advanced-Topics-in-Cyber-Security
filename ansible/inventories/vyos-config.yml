@@ -8,16 +8,15 @@
 - name: vyos network configuration
   hosts: vyos
   vars_prompt:
-
-- name: password
-  prompt: enter your new Vyos password
-  private: true
+    - name: password
+      prompt: enter your new Vyos password
+      private: true
 
 # Tasks - modules with agruments 
   tasks: 
    - name: set the password hash fact
      set_fact:
-     password_hash: "{{ password | password_hash('sha512')}}"
+        password_hash: "{{ password | password_hash('sha512') }}"
    - name: load vyos config from template 
      become: yes
      template:
