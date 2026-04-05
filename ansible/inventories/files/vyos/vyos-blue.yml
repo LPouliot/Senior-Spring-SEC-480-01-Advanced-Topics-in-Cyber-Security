@@ -1,0 +1,29 @@
+# This playbook preforms post provisining configuration for vyos blue
+
+- name: vyos network config
+  hosts: vyos 
+  tasks:
+  - name: retrieve vyos version info
+    vyos_command:
+     commands: show version
+    register: version
+
+  - debug:
+    var: version.stdout_lines
+
+  - name: configure vyos dhcp
+    vyos_config:
+      save: yes
+      lines:
+      # The commented out line below has been causing issues with configuration
+      # - set service dhcp-server global-parameters 'local-address {{ lan_ip }}'
+      - set service dhcp-server shared-network-name {{ shared_network }} authoritative
+      - set service dhcp-server shared-network-name {{ shared_network }} subnet {{ lan_net }} default-router '{{ lan_ip }}'
+      - set service dhcp-server shared-network-name {{ shared_network }} subnet {{ lan_net }} name-server '{{ dhcp_name_server }}'
+      - set service dhcp-server shared-network-name {{ shared_network }} subnet {{ lan_net }} domain-name '{{ dhcp_domain }}'
+      - set service dhcp-server shared-network-name {{ shared_network }} subnet {{ lan_net }} lease '86400'
+      - set service dhcp-server shared-network-name {{ shared_network }} subnet {{ lan_net }} range {{ shared_network }} -POOL start '10.0.5.75'
+      - set service dhcp-server shared-network-name {{ shared_network }} subnet {{ lan_net }} range {{ shared_network }} -POOL stop '10.0.5.125'
+
+
+

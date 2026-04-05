@@ -1,0 +1,18 @@
+# This is similiar to the txt file from the previous milestone
+# But as a yml format instead of a txt format 
+
+vyos:
+  hosts:
+  10.0.17.200:
+    hostname: bluex-fw
+    lan_ip: 10.0.5.2
+    lan_net: 10.0.5.0/24
+    dhcp_name_server: 10.0.17.4
+    shared_network: BLUE1
+    dhcp_domain: blue1.local
+    wan_mac: fe80::250:56ff:fe82:b21a
+    lan_mac: fe80::250:56ff:fe82:62c
+  vars:
+    ansible_python: /usr/bin/python3
+    ansible_connection: network_cli
+    ansible_user: vyos
