@@ -18,7 +18,7 @@ rocky: # group name
       lan_ip: 10.0.5.12
   vars: # Varibles that apply to all VMs
     public_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQChwB4DJwXNrM9ivvMgZ98ARmQ2GyPQs2lx47ktOS9g9fEjGAXZxkxipz17NHc+H3gG+Aj1wZuf8BRK8mO3sLWhJ7YO4IrkWryPvaHSH06JoiLy7sTqLIceg6G5ZuSW2XM5PGh0YExLYEGj37pnru3jVzS/Kfr5cI0mh6NYox7Ygh6SMTrW4XaTnd80KzyVAp7JyhwdzUunFZNJcazTnz4M+zJ4DLCNThWUQOaKyf1FBJDC8P9ss5BKHOPoV4JRwG90x0qWceRd5ZYzS+vABCKrBXPlzMO6PeSx69OcbqQi8PpodJOybFVDiJ8tOTSUOddU7EGCLfRrC1+fbrRGszMzA78UzE44j9bNnx2ME4pZzNwh1Qm1UhW8f3pT7jUmesCWrN8QZy6yIYFdDWblukYVOj5+tD51FmwRFJfwx5DTFPsFZCZSzXt5MPfrP6/r1aOhDgHw2v2eqedDyHV2/3mC3aNVCJCxMK8bmScVLATaGEOGlHdg+1AwEeW+Kab2uZhhXBi+3WjPpQqE4WKBPxdquniagIrKsm80G1bwg8ZU5fOY6GNu0QWEVvszjkKWkxW7dAb7EIENtnPPYRHATvEs9Y+wPDN2yBciD088MbRSUOjzq12EiIUlIwWce9okV1qYSSXfS8nXwCwB2dKM7OAZ8hWOQwMy9+lBZMfUMz6a+Q== admin key"
-    ansible_user: deployer
+    ansible_user: luser
     prefix: 24
     gateway: 10.0.5.2
     name_server: 10.0.5.2

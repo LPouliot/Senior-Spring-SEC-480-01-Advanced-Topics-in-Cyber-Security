@@ -27,15 +27,17 @@
       file:
         path: "/home/{{ ansible_user }}/.ssh/authorized_keys"
         state: touch
-        mode: 0644
+        mode: 0600
 
     # Add one or more lines at a time to a file
     # Adds a file to inert text into
     # The public key is inserted into the text
     - name: append Key
-      blockinfile:
-        dest: "/home/{{ ansible_user }}/.ssh/authorized_keys"
-        block: "{{ public_key }}"
+      authorized_key:
+        user: "{{ ansible_user }}"
+        key: "{{ public_key }}"
+        state: present 
+        
 
   # Privileges setup
 

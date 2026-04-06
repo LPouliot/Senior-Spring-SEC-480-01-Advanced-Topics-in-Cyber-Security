@@ -1,4 +1,4 @@
-# Playbook - define howm, in which order, on which mahines,
+# Playbook - define how, in which order, on which mahines,
 # and what modules should be executed. 
 
 # This Playbook:
@@ -24,6 +24,7 @@
         dest: /config/config.boot
         mode: "0775"
         owner: root
+        
         group: vyattacfg
    - name: bounce and end
      become: yes
