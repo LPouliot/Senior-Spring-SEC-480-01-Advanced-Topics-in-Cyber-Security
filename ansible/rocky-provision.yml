@@ -1,0 +1,112 @@
+# Provisioning Rocky to have the following:
+# - Public Key for deployer user
+# - Sudoers drop-in file for no password 
+# - Change the hostname'
+# - Change the dhcp ip address to static (10.0.5.10-12)
+# Should hopefully use the Inventory file created earlier in the lab
+
+- name: rocky configuration
+  hosts: rocky 
+  tasks: 
+
+  # Authentication setup 
+
+    # Creates a file or directory (specified)
+    # Pulls the path where it will be created
+    # Creates it as a directory
+    # Owner has rwx permission and no one else does
+    - name: create the .ssh directory
+      file: 
+        path: "/home/{{ ansible_user }}/.ssh"
+        state: directory
+        mode: 0700
+
+    # Creates as a file
+    # Everyone can read, owner can write, and no one can execute
+    - name: create auth_keys file
+      file:
+        path: "/home/{{ ansible_user }}/.ssh/authorized_keys"
+        state: touch
+        mode: 0644
+
+    # Add one or more lines at a time to a file
+    # Adds a file to inert text into
+    # The public key is inserted into the text
+    - name: append Key
+      blockinfile:
+        dest: "/home/{{ ansible_user }}/.ssh/authorized_keys"
+        block: "{{ public_key }}"
+
+  # Privileges setup
+
+    # Creates the sudoers of the file
+    # Owner and group can read, no other permissions 
+    # This uses sudo permissions
+    - name: create sudoers file
+      file:
+        path: /etc/sudoers.d/480
+        state: touch
+        mode: 0440
+      become: yes
+  
+    # Adds one or more lines to a file at a time
+    # Locates file to insert text into
+    # Adds the text to insert
+    # This uses sudo permissions 
+    - name: suoders file entry
+      blockinfile:
+       dest: /etc/sudoers.d/480
+       block: "{{ ansible_user }} ALL=(ALL) NOPASSWD: ALL"
+      become: yes
+
+  # Identity setup
+
+    # Sets the hostname of the system
+    # Pulls a hostname to use
+    # Uses sudo permissions
+    - name: set hostname
+      hostname:
+       name: "{{ hostname }}"
+      become: yes
+
+    # Checks if the specified line is in the file, if not, adds it
+    # Pulls hostname to use or check for
+    # Uses sudo permissions
+    - name: set host file hostname
+      lineinfile:
+        path: /etc/hosts
+        line: '127.0.0.1 {{ hostname }}'
+      become: yes
+
+  # Networking
+
+    # Sets the networking details
+    # Adds ens network adapter
+    # Adds ip address 
+    # Adds gateway
+    # Creates the device if not already exists
+    # Adds network type
+    # Adds Dns information 
+    # Includes no DHCP
+    # Uses sudo permissions
+    - name: nmcli
+      nmcli: 
+        conn_name: "{{ device }}"
+        ipv4: "{{ lan_ip }}/24"
+        gw4: "{{ gateway }}"
+        state: present
+        type: ethernet 
+        dns4:
+          - "{{ name_server }}"
+          - "{{ gateway }}"
+        method4: manual 
+      become: yes
+
+  # Restarting 
+
+    # Restarts the VM
+    # Runs shell commands and tells machine to sleep for 3 seconds
+    # Uses sudo permissions
+    - name: restart 
+      ansible.builtin.shell: "sleep 3 && shutdown -r"
+      become: yes
