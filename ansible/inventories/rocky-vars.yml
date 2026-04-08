@@ -23,4 +23,4 @@ rocky: # group name
     gateway: 10.0.5.2
     name_server: 10.0.5.2
     domain: blue1.local
-    device: ens33
+    device: ens34

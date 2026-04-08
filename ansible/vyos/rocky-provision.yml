@@ -11,24 +11,6 @@
 
   # Authentication setup 
 
-    # Creates a file or directory (specified)
-    # Pulls the path where it will be created
-    # Creates it as a directory
-    # Owner has rwx permission and no one else does
-    - name: create the .ssh directory
-      file: 
-        path: "/home/{{ ansible_user }}/.ssh"
-        state: directory
-        mode: 0700
-
-    # Creates as a file
-    # Everyone can read, owner can write, and no one can execute
-    - name: create auth_keys file
-      file:
-        path: "/home/{{ ansible_user }}/.ssh/authorized_keys"
-        state: touch
-        mode: 0600
-
     # Add one or more lines at a time to a file
     # Adds a file to inert text into
     # The public key is inserted into the text
@@ -94,7 +76,7 @@
     - name: nmcli
       nmcli: 
         conn_name: "{{ device }}"
-        ipv4: "{{ lan_ip }}/24"
+        ip4: "{{ lan_ip }}/24"
         gw4: "{{ gateway }}"
         state: present
         type: ethernet 

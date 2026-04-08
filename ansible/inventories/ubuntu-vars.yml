@@ -1,0 +1,17 @@
+all:
+  hosts:
+    ubuntu1:
+      ansible_host: 10.0.5.81
+      hostname: ubuntu1
+      lan_ip: 10.0.5.30
+
+    ubuntu2:
+      ansible_host: 10.0.5.78
+      hostname: ubuntu2
+      lan_ip: 10.0.5.31
+
+  vars:
+    ansible_user: admin
+    gateway: 10.0.5.2
+    name_server: 10.0.5.5
+    device: ens34

@@ -1,0 +1,79 @@
+- name: Ubuntu Post-Provisioning
+  hosts: all
+  become: yes
+  tasks:
+
+  - name: .ssh directory exists
+    file:
+      path: "/home/{{ ansible_user }}/.ssh"
+      state: directory
+      mode: 0700
+      owner: "{{ ansible_user }}"
+      group: "{{ ansible_user }}"
+
+  - name: authorized_keys exists
+    file:
+      path: "/home/{{ ansible_user }}/.ssh/authorized_keys"
+      state: touch
+      mode: 0644
+      owner: "{{ ansible_user }}"
+      group: "{{ ansible_user }}"
+
+  - name: Add admin public key
+    blockinfile:
+      dest: "/home/{{ ansible_user }}/.ssh/authorized_keys"
+      block: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+      owner: "{{ ansible_user }}"
+      group: "{{ ansible_user }}"
+      mode: 0644
+
+  - name: sudo group
+    user:
+      name: "{{ ansible_user }}"
+      groups: sudo
+      append: yes
+
+  - name: passwordless sudo for admin
+    copy:
+      dest: /etc/sudoers.d/admin
+      content: "admin ALL=(ALL) NOPASSWD:ALL\n"
+      mode: 0440
+
+  - name: hostname
+    hostname:
+      name: "{{ hostname }}"
+
+  - name: add hostname to /etc/hosts
+    lineinfile:
+      path: /etc/hosts
+      line: "127.0.1.1 {{ hostname }}"
+
+  - name: remove default netplan file
+    file:
+      path: "/etc/netplan/00-installer-config.yaml"
+      state: absent
+
+  - name: create new netplan config
+    copy:
+      dest: "/etc/netplan/01-netcfg.yaml"
+      mode: 0600
+      content: |
+        network:
+          version: 2
+          ethernets:
+            {{ device }}:
+              dhcp4: false
+              addresses:
+                - {{ lan_ip }}/24
+              routes:
+                - to: default
+                  via: {{ gateway }}
+              nameservers:
+                addresses:
+                  - {{ name_server }}
+                  - {{ gateway }}
+
+  - name: Reboot to apply network changes
+    shell: "sleep 5 && shutdown -r now"
+    async: 1
+    poll: 0
