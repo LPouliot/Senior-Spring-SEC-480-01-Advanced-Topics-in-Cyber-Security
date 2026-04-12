@@ -58,7 +58,7 @@ function CreateClone([PSCustomObject]$conf)
     # Pick the source VM from the PROD folder 
 
     Write-Host "`nSelect the source VM to clone from:" -ForegroundColor Cyan
-    $folderName = if ($conf -and $conf.vm_folder) { $conf.vm_folder } else { Read-Host "Enter the VM folder name" }
+    $folderName = if ($conf -and $conf.folder) { $conf.folder } else { Read-Host "Enter the VM folder name" }
     $vm = Select-VM -folder $folderName
 
     if (-not $vm) {
@@ -194,7 +194,7 @@ function NewNetwork([PSCustomObject]$conf)
 
 function GetIP([PSCustomObject]$conf)
 {
-    $chosen_vm = Select-VM -folder $conf.vm_folder # Runs Select-VM function and Selects a folder to search through 
+    $chosen_vm = Select-VM -folder $conf.folder # Runs Select-VM function and Selects a folder to search through 
     $details = Get-NetworkAdapter -VM $chosen_vm
     Write-Host `n"Network   | " -ForegroundColor DarkCyan -NoNewline 
     Write-Host $details.NetworkName
@@ -212,7 +212,7 @@ function StartVM([PSCustomObject]$conf)
     do{
         $Answer = Read-Host "Do you want to start a VM? [Y] [N]"
         if($Answer -eq 'Y'){
-            $pickedVM = Select-VM -folder $conf.vm_folder
+            $pickedVM = Select-VM -folder $conf.folder
             Start-VM -VM $pickedVM
             Write-Host "VM has been Started" -ForegroundColor Green
         }elseif($Answer -eq 'N'){
@@ -229,7 +229,7 @@ function StopVM([PSCustomObject]$conf)
     do{
         $Answer = Read-Host "Do you want to stop a VM? [Y] [N]"
         if($Answer -eq 'Y'){
-            $pickedVM = Select-VM -folder $conf.vm_folder
+            $pickedVM = Select-VM -folder $conf.folder
             Stop-VM -VM $pickedVM
             Write-Host "VM has been Stopped" -ForegroundColor Green
         }elseif($Answer -eq 'N'){
@@ -246,7 +246,7 @@ function SetNetwork([PSCustomObject]$conf)
 {
     Write-Host "Choosing a Network and Adapter" -ForegroundColor Cyan
     # Shows and lets the user choose a network
-    $chosenVM = Select-VM -folder $conf.vm_folder
+    $chosenVM = Select-VM -folder $conf.folder
     # Checker to see if a VM has been selected, returns if none is found
     if (-not $chosenVM){
         Write-Host "No VM Selected" -ForegroundColor Red
