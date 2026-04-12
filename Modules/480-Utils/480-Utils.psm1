@@ -32,7 +32,7 @@ function Select-VM([string] $folder)
     $selected_vm = $null
     try 
     {
-        $vms = Get-VM -Location $folder
+        $vms = Get-VM -Location (Get-Folder -Name $folder)
         $index = 1
         foreach($vm in $vms)
         {
