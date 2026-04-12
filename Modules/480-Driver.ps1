@@ -7,7 +7,7 @@ Import-Module '480-Utils' -Force
 $conf = Get-480Config -config_path "./480.json"
 
 # Calling 480Connect Function
-480Connect -server $conf.vcenter_server
+480Connect -server $conf.vcenter_serveSSr
 
 # Write-Host "Selecting your VM..."
 
@@ -35,4 +35,7 @@ $conf = Get-480Config -config_path "./480.json"
 # Calling SetNetwork Function
 #SetNetwork -conf $conf 
 
+### Milestone 9 ### 
 
+# Setup static IP of windows systems
+SetWindowsIP -conf $conf
