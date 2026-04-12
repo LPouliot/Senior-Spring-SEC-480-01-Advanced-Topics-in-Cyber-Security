@@ -295,3 +295,20 @@ function SetNetwork([PSCustomObject]$conf)
         Write-Host "Invalid adapter" -ForegroundColor Yellow
     }
 }
+
+## Milestone 9 ##
+
+# Function that set a static IP fpr windows systems 
+# By ysing the Invoke-VMScript Powercli 
+# Can call an OS command like Netsh and setup guest credentials
+
+function SetWindowsIP([PSCustomObject]$conf)
+{
+$select_vm = Select-VM # Grabbing a VM from the other function
+$user = Read-Host "Enter the username of" $select_vm.name # Grabbing the username
+$pass = Read-Host -AsSecureString "Enter the password of $user" # Securly grabbing the password
+$credential = [PScredential]::new($user,$pass) #storing the user and pass as a single credential object
+$setIpAddr = 'netsh interface ip set address "eth1" static 10.0.5.5 255.255.255.0 10.0.5.2 10.0.5.2' # Setting Static IP, netmask, gateway, nameserver
+$setDnsServer = 'netsh interface ip set dnsservers "eht1" static 10.0.5.2' # setting dns server
+Invoke-VMScript -VM $select_vm "$setIpAddr $setDnsServer" -GuestCredential $credential # using Invoke-VMScript to run a script in the guest OS, setting what was specified in the varibles
+}
