@@ -1,0 +1,9 @@
+Import-Module ActiveDirectory
+
+New-ADOrganizationalUnit -Name "BLUE1" -Path "DC=BLUE,DC=local" -ProtectedFromAccidentalDeletion $false
+
+New-ADOrganizationalUnit -Name "Accounts" -Path "OU=BLUE1,DC=BLUE,DC=local" -ProtectedFromAccidentalDeletion $false
+New-ADOrganizationalUnit -Name "Groups" -Path "OU=BLUE1,DC=BLUE,DC=local" -ProtectedFromAccidentalDeletion $false
+New-ADOrganizationalUnit -Name "Computers" -Path "OU=BLUE1,DC=BLUE,DC=local" -ProtectedFromAccidentalDeletion $false
+New-ADOrganizationalUnit -Name "Servers" -Path "OU=BLUE1,DC=BLUE,DC=local" -ProtectedFromAccidentalDeletion $false
+New-ADOrganizationalUnit -Name "Workstations" -Path "OU=BLUE1,DC=BLUE,DC=local" -ProtectedFromAccidentalDeletion $false
