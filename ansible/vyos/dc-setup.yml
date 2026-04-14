@@ -1,0 +1,56 @@
+- name: domain Controller Config
+  hosts: servers
+  vars_prompt:
+    - name: password
+      prompt: Enter new local admin password
+      private: yes
+
+  tasks:
+    - name: set new local admin password
+      ansible.windows.win_user:
+        name: Administrator
+        password: "{{ password }}"
+        password_expired: false
+        update_password: always
+
+    - name: hostname
+      ansible.windows.win_hostname:
+        name: "{{ hostname }}"
+      register: hostname_change
+
+    - name: reboot
+      ansible.windows.win_reboot:
+      when: hostname_change.reboot_required
+
+    - name: new forest
+      microsoft.ad.domain:
+        dns_domain_name: "{{ domain }}"
+        safe_mode_password: "{{ password }}"
+      register: domain_install
+
+    - name: reboot
+      ansible.windows.win_reboot:
+        test_command: 'exit (Get-Service -Name DNS).Status -ne "Running"'
+      when: domain_install.reboot_required
+
+    - name: DNS forwarder
+      ansible.windows.win_shell: Add-DnsServerForwarder -IPAddress 10.0.5.2
+
+    - name: wait for AD to finish
+      ansible.builtin.pause:
+        seconds: 60
+
+    - name: wait for WinRM 
+      ansible.windows.win_wait_for:
+        port: 5985
+        delay: 10
+        timeout: 300
+
+    - name: copy OU script
+      ansible.builtin.copy:
+        src: /home/admin/SavC-TechJournal-SEC480/ansible/windows_server/files/winServer/ou.ps1.j2
+        dest: C:\Users\Administrator\ou.ps1
+
+    - name: create OU structure
+      ansible.windows.win_shell: |
+        powershell -ExecutionPolicy Bypass -File C:\Users\Administrator\ou.ps1
