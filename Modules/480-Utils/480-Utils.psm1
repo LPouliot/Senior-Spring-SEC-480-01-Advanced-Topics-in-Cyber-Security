@@ -302,13 +302,36 @@ function SetNetwork([PSCustomObject]$conf)
 # By ysing the Invoke-VMScript Powercli 
 # Can call an OS command like Netsh and setup guest credentials
 
-function SetWindowsIP([PSCustomObject]$conf)
-{
-$select_vm = Select-VM # Grabbing a VM from the other function
-$user = Read-Host "Enter the username of" $select_vm.name # Grabbing the username
-$pass = Read-Host -AsSecureString "Enter the password of $user" # Securly grabbing the password
-$credential = [PScredential]::new($user,$pass) #storing the user and pass as a single credential object
-$setIpAddr = 'netsh interface ip set address "eth1" static 10.0.5.5 255.255.255.0 10.0.5.2 10.0.5.2' # Setting Static IP, netmask, gateway, nameserver
-$setDnsServer = 'netsh interface ip set dnsservers "eht1" static 10.0.5.2' # setting dns server
-Invoke-VMScript -VM $select_vm "$setIpAddr $setDnsServer" -GuestCredential $credential # using Invoke-VMScript to run a script in the guest OS, setting what was specified in the varibles
+function Set-WindowsIP {
+    Write-Host "Select the VM to set a static IP on" -ForegroundColor Cyan
+    $vm = Select-VM
+
+    if (-not $vm) {
+        Write-Host "No VM selected." -ForegroundColor Red
+        return
+    }
+
+    $user = Read-Host "Enter the Windows username"
+    $pass = Read-Host "Enter the password for $user" -AsSecureString
+
+    # convert secure password
+    $plain = [System.Net.NetworkCredential]::new("", $pass).Password
+
+    # hard-coded for blue1 dc
+    $cmd = @"
+netsh interface ip set address "Ethernet0" static 10.0.5.5 255.255.255.0 10.0.5.2 1
+netsh interface ip set dnsservers "Ethernet0" static 10.0.5.2
+ipconfig /all
+"@
+
+    Write-Host "Applying static IP settings..." -ForegroundColor Yellow
+
+    $result = Invoke-VMScript -VM $vm `
+        -ScriptText $cmd `
+        -GuestUser $user `
+        -GuestPassword $plain `
+        -ScriptType bat
+
+    Write-Host $result.ScriptOutput
+    Write-Host "Static IP set successfully." -ForegroundColor Green
 }
