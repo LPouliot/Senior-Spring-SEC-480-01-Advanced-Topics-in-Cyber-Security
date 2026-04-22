@@ -1,0 +1,42 @@
+- name: install and configure wazuh agent rocky
+  hosts: wazuh_agents
+  become: yes
+
+  vars:
+    wazuh_manager_ip: "10.0.5.87"
+
+  tasks:
+    - name: dependencies
+      dnf:
+        name:
+          - curl
+        state: present
+
+    - name: download wazuh agent rpm with curl
+      command: >
+        curl -o /tmp/wazuh-agent-4.7.5-1.x86_64.rpm
+        https://packages.wazuh.com/4.x/yum/wazuh-agent-4.7.5-1.x86_64.rpm
+
+    - name: install wazuh agent with manager IP
+      command: >
+        bash -c "WAZUH_MANAGER='{{ wazuh_manager_ip }}'
+        rpm -ihv /tmp/wazuh-agent-4.7.5-1.x86_64.rpm"
+
+    - name: manager IP
+      lineinfile:
+        path: /var/ossec/etc/ossec.conf
+        regexp: '<address>.*</address>'
+        line: '<address>{{ wazuh_manager_ip }}</address>'
+
+    - name: pause before enabling service
+      pause:
+        seconds: 5
+
+    - name: reload systemd daemon
+      command: systemctl daemon-reload
+
+    - name: enable wazuh-agent
+      command: systemctl enable wazuh-agent
+
+    - name: start wazuh-agent
+      command: systemctl start wazuh-agent
