@@ -1,0 +1,137 @@
+# Playbook that triggers Wazuh's agent capabilites! 
+
+- name: Wazuh SIEM Alert Demo Playbook
+  hosts: wazuh_agents
+  become: yes
+
+  vars_files:
+    - wazuh-agent-vars.yml 
+
+  tasks:
+  # Setup
+    - name: Setup Create Simulation
+      file:
+        path: "{{ testDirectory }}"
+        state: directory
+        mode: '0775'
+  
+  # File Integrity Monitor simulation
+  # Simulates an attacker dropping a file into a senstive path 
+    - name: FIM Create
+      copy:
+        content: "# simulated malicious configure\n"
+        dest: "{{ fimTestFile }}"
+        mode: '0644'
+
+    - name: FIM Modify
+      lineinfile:
+        path: "{{ fimTestFile }}"
+        line: "malicious_entry=true"
+    
+    - name: FIM Delete
+      file:
+        path: "{{ fimTestFile }}"
+        state: absent 
+
+  # Shadow Access Simulation 
+  # Simulates an attacker trying to gain credential access/password dump
+    - name: Shadow Attempt to Read
+      command: cat /etc/shadow
+      register: shadow_output
+      ignore_errors: yes
+    
+  # Suspicious Command Simulation
+  # Simulates reconnaissance (scouting) commands like a threat actor 
+    - name: Recon Enumerate Current Users
+      command: who
+      register: who_output
+
+    - name: Recon List all Running Processes 
+      command: ps aux
+      register: ps_output
+
+    - name: Recon Dump network connections
+      command: ss -tulnp 
+      register: network_output
+
+    - name: Recon Check sudoers file
+      command: cat /etc/sudoers
+      ignore_errors: yes
+  
+  # Malicious Script Simulation
+  # Simulates an attacker running a shell-based payload
+    - name: Malicious Script Write the Script
+      copy:
+        dest: "{{ malScriptPath }}"
+        mode: '0775'
+        content: |
+          #!/bin/bash
+          # simulated attacker script 
+          echo "*Hacker Voice* I'm In"
+          whoami
+          hostname
+          uname -a
+          cat /etc/passwd
+          ls /home/
+    
+    - name: Malicious Script Execute Script
+      command: "{{ malScriptPath }}"
+      register: malscript_output
+  
+  # Failed Authentication Simulation
+  # Simulates account creation by an attacker for persistence
+
+    - name: Persistence Create a sus user
+      user:
+        name: "{{ testUser }}"
+        shell: /bin/bash
+        state: present
+    
+    - name: Persistence Add test user to sudo
+      user:
+        name: "{{ testUser }}"
+        groups: wheel
+        append: yes
+    
+    - name: Persistence Delete test user 
+      user:
+        name: "{{ testUser }}"
+        state: absent
+        remove: yes
+
+  # Log Tampering Simulation
+  # Simulates an attacker attemping to clear logs
+    - name: LOG Attempt to clear auth logs
+      command: truncate -s 0 {{ authLogPath }}
+      ignore_errors: yes
+    
+    - name: LOG write fake log 
+      lineinfile:
+        path: "{{ syslogPath }}"
+        line: "{{ fakeLogEntry }}"
+        insertafter: EOF
+      ignore_errors: yes
+  
+  # NMAP Port Scan Simulation
+  # Simulates interenet reconnaissance (scouting) and lateral movement 
+
+    - name: PORT Install nmap 
+      dnf:
+        name: nmap 
+        state: present
+      ignore_errors: yes
+
+    - name: PORT run nmap scan against localhost 
+      command: nmap -sV -p {{ nmapPorts }} {{ nmapTarget }}
+      register: nmap_output
+      ignore_errors: yes
+  
+  # Just some cleanup, removing the directory created for this simulation
+    - name: Cleanup Remove Simulation Directory 
+      file:
+        path: "{{ testDirectory }}"
+        state: absent 
+
+
+  
+
