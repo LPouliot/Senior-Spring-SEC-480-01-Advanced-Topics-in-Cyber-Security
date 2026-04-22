@@ -1,0 +1,26 @@
+- name: Install Wazuh Server (Manager + Indexer + Dashboard) on Ubuntu
+  hosts: wazuh_server
+  become: yes
+
+  tasks:
+    - name: Install dependencies
+      apt:
+        name:
+          - curl
+          - wget
+          - apt-transport-https
+          - gnupg
+        state: present
+        update_cache: yes
+
+    - name: Download Wazuh installer script
+      get_url:
+        url: https://packages.wazuh.com/4.7/wazuh-install.sh
+        dest: /tmp/wazuh-install.sh
+        mode: '0755'
+
+    - name: Run Wazuh pre-install (auto mode)
+      command: bash /tmp/wazuh-install.sh -a
+
+    - name: Run full Wazuh install (indexer + manager + dashboard)
+      command: bash /tmp/wazuh-install.sh -i -o -a
