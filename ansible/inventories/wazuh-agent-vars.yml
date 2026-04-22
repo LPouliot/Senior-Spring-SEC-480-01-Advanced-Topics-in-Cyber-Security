@@ -1,0 +1,28 @@
+# Varibles for the Wazuh SIEM Alert Simulation 
+
+# Creating a new user for the persistence simulation
+testUser: "Faker_luser"
+
+# Directory for simulation artifacts
+testDirectory: "/tmp/wazuh_sim"
+
+# Malicious script pathing 
+malScriptPath: "/tmp/wazuh_sim/mal_sim.sh"
+
+# Ports for nmap scaning simulation
+nmapPorts: "22,80,443,3306,5432"
+
+# The target for Nmap (the loopback address)
+nmapTarget: "127.0.0.1"
+
+# Fake syslog entry to display log tampering simulation
+fakeLogEntry: "Apr-22 localhost sudo: hehe Get Attacked"
+
+# Targeted paths by FIM simulation
+fimTestFile: "/etc/wazuh_fim_test.conf"
+
+# Authentication log path for tamper simulation
+authLogPath: "/var/log/secure"
+
+# Syslog pathing for injection simulation
+syslogPath: "/var/log/messages"
