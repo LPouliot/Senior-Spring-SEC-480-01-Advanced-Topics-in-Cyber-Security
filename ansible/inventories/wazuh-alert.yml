@@ -8,6 +8,7 @@
     - wazuh-agent-vars.yml 
 
   tasks:
+
   # Setup
     - name: Setup Create Simulation
       file:
@@ -33,12 +34,22 @@
         path: "{{ fimTestFile }}"
         state: absent 
 
+  # Need to add a pause, since I was overloading the agent
+  # and making it drop a lot of events
+    - name: Take a breather
+      pause: 
+        seconds: 15
+
   # Shadow Access Simulation 
   # Simulates an attacker trying to gain credential access/password dump
     - name: Shadow Attempt to Read
       command: cat /etc/shadow
       register: shadow_output
       ignore_errors: yes
+
+    - name: Take a breather
+      pause: 
+        seconds: 15
     
   # Suspicious Command Simulation
   # Simulates reconnaissance (scouting) commands like a threat actor 
@@ -57,6 +68,10 @@
     - name: Recon Check sudoers file
       command: cat /etc/sudoers
       ignore_errors: yes
+  
+    - name: Take a breather
+      pause: 
+        seconds: 15
   
   # Malicious Script Simulation
   # Simulates an attacker running a shell-based payload
@@ -78,6 +93,10 @@
       command: "{{ malScriptPath }}"
       register: malscript_output
   
+    - name: Take a breather
+      pause: 
+        seconds: 15
+
   # Failed Authentication Simulation
   # Simulates account creation by an attacker for persistence
 
@@ -99,6 +118,10 @@
         state: absent
         remove: yes
 
+    - name: Take a breather
+      pause: 
+        seconds: 15
+
   # Log Tampering Simulation
   # Simulates an attacker attemping to clear logs
     - name: LOG Attempt to clear auth logs
@@ -112,6 +135,10 @@
         insertafter: EOF
       ignore_errors: yes
   
+    - name: Take a breather
+      pause: 
+        seconds: 15
+
   # NMAP Port Scan Simulation
   # Simulates interenet reconnaissance (scouting) and lateral movement 
 
@@ -125,6 +152,10 @@
       command: nmap -sV -p {{ nmapPorts }} {{ nmapTarget }}
       register: nmap_output
       ignore_errors: yes
+
+    - name: Take a breather
+      pause: 
+        seconds: 15
   
   # Just some cleanup, removing the directory created for this simulation
     - name: Cleanup Remove Simulation Directory 
